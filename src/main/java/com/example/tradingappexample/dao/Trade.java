@@ -69,4 +69,12 @@ public class Trade {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
+    }
 }

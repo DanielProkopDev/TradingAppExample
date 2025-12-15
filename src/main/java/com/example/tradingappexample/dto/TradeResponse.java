@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record TradeResponse(
         UUID id,
+        Long version,
         String symbol,
         Side side,
         BigDecimal quantity,

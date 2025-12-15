@@ -4,6 +4,7 @@ package com.example.tradingappexample.controller;
 import com.example.tradingappexample.dto.CreateTradeRequest;
 import com.example.tradingappexample.dto.TradeResponse;
 import com.example.tradingappexample.dto.TradeResult;
+import com.example.tradingappexample.dto.UpdateTraderPriceRequest;
 import com.example.tradingappexample.service.TradeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -40,5 +41,11 @@ public class TradeController {
     public ResponseEntity<TradeResponse> get(@PathVariable UUID id){
         TradeResponse response = service.get(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+    @PatchMapping("/{id}/price")
+    public ResponseEntity<TradeResponse> updatePrice(
+            @PathVariable UUID id, @Valid @RequestBody UpdateTraderPriceRequest request
+            ){
+        return ResponseEntity.ok(service.updatePrice(id,request));
     }
 }

@@ -24,6 +24,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/trades/**").hasRole("TRADER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/trades").hasRole("TRADER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/trades/**").hasRole("TRADER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())

@@ -1,8 +1,10 @@
 package com.example.tradingappexample.exceptions;
 
 
+import jakarta.persistence.OptimisticLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,5 +41,23 @@ public class GlobalExceptionHandler {
         problem.setProperty("code", "VALIDATION_ERROR");
 
         return problem;
+    }
+
+    @ExceptionHandler({ObjectOptimisticLockingFailureException.class, OptimisticLockException.class})
+    public ProblemDetail handleOptimisticLock(Exception ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        pd.setTitle("Conflict");
+        pd.setDetail("The trade was modified by another request. Reload and retry.");
+        pd.setProperty("code", "OPTIMISTIC_LOCK_CONFLICT");
+        return pd;
+    }
+
+    @ExceptionHandler(TradeVersionMismatchException.class)
+    public ProblemDetail handleVersionMismatch(TradeVersionMismatchException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        pd.setTitle("Conflict");
+        pd.setDetail(ex.getMessage());
+        pd.setProperty("code", "VERSION_MISMATCH");
+        return pd;
     }
 }

@@ -1,12 +1,14 @@
 package com.example.tradingappexample.service;
 
 
+import com.example.tradingappexample.dto.UpdateTraderPriceRequest;
 import com.example.tradingappexample.exceptions.TradeNotFoundException;
 import com.example.tradingappexample.dao.IdempotencyKey;
 import com.example.tradingappexample.dao.Trade;
 import com.example.tradingappexample.dto.CreateTradeRequest;
 import com.example.tradingappexample.dto.TradeResponse;
 import com.example.tradingappexample.dto.TradeResult;
+import com.example.tradingappexample.exceptions.TradeVersionMismatchException;
 import com.example.tradingappexample.repository.IdempotencyKeyRepository;
 import com.example.tradingappexample.repository.TradeRepository;
 import org.springframework.stereotype.Service;
@@ -52,7 +54,20 @@ public class TradeService {
         Trade t = trades.findById(id).orElseThrow(()->new TradeNotFoundException(id));
         return toResponse(t);
     }
+
+
+    public TradeResponse updatePrice(UUID id, UpdateTraderPriceRequest req){
+        Trade trade = trades.findById(id).orElseThrow(()->new TradeNotFoundException(id));
+
+        if(!trade.getVersion().equals(req.version())  ){
+            throw new TradeVersionMismatchException(id, req.version(),  trade.getVersion());
+        }
+        trade.setPrice(req.price());
+        trades.flush();
+        return toResponse(trade);
+    }
+
     private static TradeResponse toResponse(Trade t){
-        return new TradeResponse(t.getId(),t.getSymbol(),t.getSide(),t.getQuantity(),t.getPrice(),t.getCreatedAt());
+        return new TradeResponse(t.getId(),t.getVersion(),t.getSymbol(),t.getSide(),t.getQuantity(),t.getPrice(),t.getCreatedAt());
     }
 }
