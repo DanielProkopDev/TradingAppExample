@@ -7,7 +7,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name="idempotency_keys", uniqueConstraints = @UniqueConstraint(columnNames = "idemKey"))
+@Table(name="idempotency_keys",
+        uniqueConstraints = @UniqueConstraint(name="uk_idempotency_idem_key",columnNames = "idem_Key"))
 public class IdempotencyKey{
     @Id
     @GeneratedValue
@@ -37,5 +38,13 @@ public class IdempotencyKey{
 
     public Trade getTrade() {
         return trade;
+    }
+
+    public String getIdemKey() {
+        return idemKey;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

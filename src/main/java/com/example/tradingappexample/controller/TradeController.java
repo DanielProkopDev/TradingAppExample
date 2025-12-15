@@ -23,7 +23,6 @@ public class TradeController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TradeResponse> create(@RequestHeader(name = "Idempotency-Key",required=false) String idemKey,
                                                 @Valid @RequestBody CreateTradeRequest request){
         TradeResult result = service.create(request,idemKey);

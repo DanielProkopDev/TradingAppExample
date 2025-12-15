@@ -1,7 +1,7 @@
 package com.example.tradingappexample.service;
 
 
-import com.example.tradingappexample.Exceptions.TradeNotFoundException;
+import com.example.tradingappexample.exceptions.TradeNotFoundException;
 import com.example.tradingappexample.dao.IdempotencyKey;
 import com.example.tradingappexample.dao.Trade;
 import com.example.tradingappexample.dto.CreateTradeRequest;
