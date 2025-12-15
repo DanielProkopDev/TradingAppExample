@@ -6,6 +6,7 @@ import com.example.tradingappexample.dao.IdempotencyKey;
 import com.example.tradingappexample.dao.Trade;
 import com.example.tradingappexample.dto.CreateTradeRequest;
 import com.example.tradingappexample.dto.TradeResponse;
+import com.example.tradingappexample.dto.TradeResult;
 import com.example.tradingappexample.repository.IdempotencyKeyRepository;
 import com.example.tradingappexample.repository.TradeRepository;
 import org.springframework.stereotype.Service;
@@ -24,11 +25,13 @@ public class TradeService {
         this.idempotency = idempotency;
     }
 
-    public TradeResponse create(CreateTradeRequest req, String idemKey) {
+    public TradeResult create(CreateTradeRequest req, String idemKey) {
+
         if(idemKey != null && !idemKey.isBlank()) {
             var existing = idempotency.findByIdemKey(idemKey);
             if(existing.isPresent()){
-                return toResponse(existing.get().getTrade());
+                Trade trade = existing.get().getTrade();
+                return new TradeResult(toResponse(trade), true);
             }
         }
         Trade saved = trades.save(new Trade(
@@ -41,7 +44,7 @@ public class TradeService {
         if(idemKey != null && !idemKey.isBlank()) {
             idempotency.save(new IdempotencyKey(idemKey,saved));
         }
-        return toResponse(saved);
+        return new  TradeResult(toResponse(saved), false);
     }
 
     @Transactional(readOnly = true)
