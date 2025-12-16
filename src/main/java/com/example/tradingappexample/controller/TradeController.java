@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -42,10 +43,6 @@ public class TradeController {
         TradeResponse response = service.get(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-    @PatchMapping("/{id}/price")
-    public ResponseEntity<TradeResponse> updatePrice(
-            @PathVariable UUID id, @Valid @RequestBody UpdateTraderPriceRequest request
-            ){
-        return ResponseEntity.ok(service.updatePrice(id,request));
-    }
+
+
 }

@@ -14,6 +14,8 @@ import com.example.tradingappexample.repository.TradeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -56,16 +58,8 @@ public class TradeService {
     }
 
 
-    public TradeResponse updatePrice(UUID id, UpdateTraderPriceRequest req){
-        Trade trade = trades.findById(id).orElseThrow(()->new TradeNotFoundException(id));
 
-        if(!trade.getVersion().equals(req.version())  ){
-            throw new TradeVersionMismatchException(id, req.version(),  trade.getVersion());
-        }
-        trade.setPrice(req.price());
-        trades.flush();
-        return toResponse(trade);
-    }
+
 
     private static TradeResponse toResponse(Trade t){
         return new TradeResponse(t.getId(),t.getVersion(),t.getSymbol(),t.getSide(),t.getQuantity(),t.getPrice(),t.getCreatedAt());

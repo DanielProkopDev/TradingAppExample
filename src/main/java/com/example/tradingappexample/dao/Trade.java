@@ -2,12 +2,14 @@ package com.example.tradingappexample.dao;
 
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.Immutable;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
+@Immutable
 @Table(name="trades")
 public class Trade {
     @Id @GeneratedValue(strategy= GenerationType.UUID)
@@ -16,20 +18,20 @@ public class Trade {
     @Version
     private Long version;
 
-    @Column(nullable=false, length=16)
+    @Column(nullable=false, updatable = false, length=16)
     private String symbol;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length=4)
+    @Column(nullable = false,updatable = false, length=4)
     private Side side;
 
-    @Column(nullable = false, precision=19, scale=6)
+    @Column(nullable = false,updatable = false, precision=19, scale=6)
     private BigDecimal quantity;
 
-    @Column(nullable=false, precision = 19, scale=6)
+    @Column(nullable=false,updatable = false, precision = 19, scale=6)
     private BigDecimal price;
 
-    @Column(nullable = false)
+    @Column(nullable = false,updatable = false)
     private Instant createdAt;
 
     protected Trade() {}
@@ -70,11 +72,4 @@ public class Trade {
         return createdAt;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public void setQuantity(BigDecimal quantity) {
-        this.quantity = quantity;
-    }
 }
