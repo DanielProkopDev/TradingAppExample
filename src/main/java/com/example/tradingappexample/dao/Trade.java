@@ -31,17 +31,22 @@ public class Trade {
     @Column(nullable=false,updatable = false, precision = 19, scale=6)
     private BigDecimal price;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private Order order;
+
     @Column(nullable = false,updatable = false)
     private Instant createdAt;
 
     protected Trade() {}
 
-    public Trade(String symbol, Side side, BigDecimal quantity, BigDecimal price) {
+    public Trade(String symbol, Side side, BigDecimal quantity, BigDecimal price, Order order) {
         this.symbol = symbol;
         this.side = side;
         this.quantity = quantity;
         this.price = price;
         this.createdAt = Instant.now();
+        this.order = order;
     }
 
     public UUID getId() {

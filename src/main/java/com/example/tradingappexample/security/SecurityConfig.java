@@ -22,6 +22,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasRole("TRADER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders/**").hasRole("TRADER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/**").hasRole("TRADER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/trades/**").hasRole("TRADER")
                         .requestMatchers(HttpMethod.POST, "/api/v1/trades").hasRole("TRADER")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/trades/**").hasRole("TRADER")

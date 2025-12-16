@@ -19,7 +19,7 @@ public class TradeRepositoryTest {
 
     @Test
     void saveAndFind(){
-        Trade t = repo.save(new Trade("EURUSD", Side.BUY,new BigDecimal("1"),new BigDecimal("1.1")));
+        Trade t = repo.save(new Trade("EURUSD", Side.BUY,new BigDecimal("1"),new BigDecimal("1.1"),null));
         assertTrue(repo.findById(t.getId()).isPresent());
     }
 }

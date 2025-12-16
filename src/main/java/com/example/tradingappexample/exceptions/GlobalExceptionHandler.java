@@ -2,11 +2,13 @@ package com.example.tradingappexample.exceptions;
 
 
 import jakarta.persistence.OptimisticLockException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -16,12 +18,13 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(TradeNotFoundException.class)
-    public ProblemDetail handleTradeNotFound(TradeNotFoundException ex){
+    @ExceptionHandler({TradeNotFoundException.class,
+            OrderNotFoundException.class})
+    public ProblemDetail handleNotFound(TradeNotFoundException ex){
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
-        pd.setTitle("Trade Not Found");
+        pd.setTitle("Resource Not Found");
         pd.setDetail(ex.getMessage());
-        pd.setProperty("code", "TRADE_NOT_FOUND");
+        pd.setProperty("code", "NOT_FOUND");
         return pd;
     }
 
@@ -52,12 +55,45 @@ public class GlobalExceptionHandler {
         return pd;
     }
 
-    @ExceptionHandler(TradeVersionMismatchException.class)
-    public ProblemDetail handleVersionMismatch(TradeVersionMismatchException ex) {
-        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-        pd.setTitle("Conflict");
+
+
+    @ExceptionHandler(InvalidFillQuantityException.class)
+    public ProblemDetail handleInvalidFill(InvalidFillQuantityException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Invalid fill quantity");
         pd.setDetail(ex.getMessage());
-        pd.setProperty("code", "VERSION_MISMATCH");
+        pd.setProperty("code", "INVALID_FILL_QTY");
+        return pd;
+    }
+
+    @ExceptionHandler({
+            OrderAlreadyClosedException.class,
+            OrderAlreadyFilledException.class,
+            OrderAlreadyCancelledException.class,
+            OrderOverfillException.class
+    })
+    public ProblemDetail handleOrderConflict(RuntimeException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        pd.setTitle("Order state conflict");
+        pd.setDetail(ex.getMessage());
+        pd.setProperty("code", "ORDER_CONFLICT");
+        return pd;
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ProblemDetail handleMissingHeader(MissingRequestHeaderException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Missing request header");
+        pd.setDetail(ex.getMessage());
+        pd.setProperty("code", "MISSING_HEADER");
+        return pd;
+    }
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
+        ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle("Validation failed");
+        pd.setDetail(ex.getMessage());
+        pd.setProperty("code", "VALIDATION_ERROR");
         return pd;
     }
 }

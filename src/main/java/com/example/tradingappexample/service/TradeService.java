@@ -1,19 +1,19 @@
 package com.example.tradingappexample.service;
 
 
-import com.example.tradingappexample.dto.UpdateTraderPriceRequest;
+import com.example.tradingappexample.dao.Order;
+import com.example.tradingappexample.dto.*;
 import com.example.tradingappexample.exceptions.TradeNotFoundException;
 import com.example.tradingappexample.dao.IdempotencyKey;
 import com.example.tradingappexample.dao.Trade;
-import com.example.tradingappexample.dto.CreateTradeRequest;
-import com.example.tradingappexample.dto.TradeResponse;
-import com.example.tradingappexample.dto.TradeResult;
 import com.example.tradingappexample.exceptions.TradeVersionMismatchException;
 import com.example.tradingappexample.repository.IdempotencyKeyRepository;
 import com.example.tradingappexample.repository.TradeRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,24 +31,39 @@ public class TradeService {
 
     public TradeResult create(CreateTradeRequest req, String idemKey) {
 
-        if(idemKey != null && !idemKey.isBlank()) {
-            var existing = idempotency.findByIdemKey(idemKey);
-            if(existing.isPresent()){
-                Trade trade = existing.get().getTrade();
-                return new TradeResult(toResponse(trade), true);
-            }
+        var existing = idempotency.findByIdemKey(idemKey);
+        if (existing.isPresent()) {
+            return new TradeResult(
+                    toResponse(existing.get().getTrade()),
+                    true
+            );
         }
-        Trade saved = trades.save(new Trade(
-           req.symbol().trim().toUpperCase(),
-           req.side(),
-           req.quantity(),
-           req.price()
-        ));
 
-        if(idemKey != null && !idemKey.isBlank()) {
-            idempotency.save(new IdempotencyKey(idemKey,saved));
+        try {
+            Trade trade = trades.save(new Trade(
+                    req.symbol().trim().toUpperCase(),
+                    req.side(),
+                    req.quantity(),
+                    req.price(),
+                    null
+            ));
+
+            idempotency.save(new IdempotencyKey(idemKey, trade));
+
+            return new TradeResult(
+                    toResponse(trade),
+                    false
+            );
+        }catch(DataIntegrityViolationException e){
+            Trade replayed = idempotency.findByIdemKey(idemKey)
+                    .orElseThrow()
+                    .getTrade();
+
+            return new TradeResult(
+                    toResponse(replayed),
+                    true
+            );
         }
-        return new  TradeResult(toResponse(saved), false);
     }
 
     @Transactional(readOnly = true)
@@ -56,9 +71,23 @@ public class TradeService {
         Trade t = trades.findById(id).orElseThrow(()->new TradeNotFoundException(id));
         return toResponse(t);
     }
+    @Transactional(readOnly = true)
+    public List<TradeResponse> getTradesForOrder(UUID orderId) {
+        return trades.findByOrderId(orderId).stream()
+                .map(TradeService::toResponse)
+                .toList();
+    }
 
-
-
+    public TradeResponse createFromOrder(Order order, BigDecimal qty, BigDecimal price){
+        Trade trade = new Trade(
+                order.getSymbol(),
+                order.getSide(),
+                qty,
+                price,
+                order
+        );
+        return toResponse(trades.save(trade));
+    }
 
 
     private static TradeResponse toResponse(Trade t){
